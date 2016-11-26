@@ -1,30 +1,27 @@
 package it.albertus.commodore.missione;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class PrintMap {
 
 	public static void main(String... args) throws IOException {
-		InputStream is = new BufferedInputStream(new FileInputStream("c:/users/alberto/desktop/c64/missione.vsf"));
-		byte[] file = new byte[69794];
+		final InputStream is = PrintMap.class.getResourceAsStream("missione.vsf");
+		final byte[] file = new byte[69794];
 		is.read(file);
 		is.close();
 
 //		int inizio = 0x8e84;
 
-		int inizio = 41092;
+		final int inizio = 41092;
 
-		int fine = 0xB483;
+		final int fine = 0xB483;
 
-		char mappa[][] = new char[128][128];
+		final char mappa[][] = new char[128][128];
 		int row = 0;
 		int col = 0;
 
 		for (int i = inizio; i <= fine; i++) {
-
 			if (row != 0 && row % 128 == 0) {
 				i += 128;
 				row = 0;
@@ -45,7 +42,6 @@ public class PrintMap {
 			row++;
 		}
 
-
 		int i = 0;
 		for (char[] riga : mappa) {
 			String sriga = new String(riga);
@@ -57,7 +53,6 @@ public class PrintMap {
 				System.out.print("\r\n");
 			}
 		}
-
 	}
 
 	private static char toChar(String e) {
