@@ -10,6 +10,8 @@ import java.util.OptionalInt;
 public class PrintMap {
 
 	public static void main(final String... args) throws IOException {
+		final var outPath = Path.of(args != null && args.length > 0 && args[0] != null && !args[0].isBlank() ? args[0].trim() : "map.txt");
+
 		final byte[] dump;
 		try (final var is = PrintMap.class.getResourceAsStream("dump.vsf")) {
 			dump = is.readAllBytes();
@@ -17,17 +19,24 @@ public class PrintMap {
 
 		final var baseAddr = memmem(dump, "C64MEM".getBytes(StandardCharsets.US_ASCII)).orElseThrow();
 		final var startAddr = baseAddr + 0xA01A;
-		final var endAddr = startAddr + 5000;
+		final var endAddr = startAddr + 5120;
 
-		final var map = new char[128][84];
+		final var map1 = new char[128][84];
+		final var map2 = new char[128][84];
+		var maps = new char[][][] {map1,map2};
+		var j = 0;
+		var map = maps[j];
 		var row = 0;
 		var col = 0;
 
 		for (var i = startAddr; i <= endAddr; i++) {
+			System.out.println(i);
 			if (row != 0 && row % 128 == 0) {
-				i += 128;
+				//i += 128;
+				j = j==0?1:0;
+				map = maps[j];
+				col += 2;
 				row = 0;
-				col += 4;
 			}
 
 			// dividere il byte in 4 parti binarie 00 00 00 00 che vanno in orizzontale
@@ -44,20 +53,25 @@ public class PrintMap {
 			row++;
 		}
 
-		final var outPath = Path.of("map.txt");
 		Files.write(outPath, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
 		try (final var fw = Files.newBufferedWriter(outPath, StandardOpenOption.APPEND)) {
-			var ln = 0;
-			for (final var riga : map) {
-				final var sriga = new StringBuilder();
-				for (final var c : riga) {
-					sriga.append(c).append(c);
+			for (final var rowArr : map1) {
+				final var rowStr = new StringBuilder();
+				for (final var c : rowArr) {
+					rowStr.append(c).append(c);
 				}
-
-				if (!sriga.toString().isBlank()) {
-					final var sln = String.format("%3d ", ++ln);
-					fw.append(sln);
-					fw.append(sriga.toString());
+				if (!rowStr.toString().isBlank()) {
+					fw.append(rowStr);
+					fw.newLine();
+				}
+			}
+			for (final var rowArr : map2) {
+				final var rowStr = new StringBuilder();
+				for (final var c : rowArr) {
+					rowStr.append(c).append(c);
+				}
+				if (!rowStr.toString().isBlank()) {
+					fw.append(rowStr.toString().trim());
 					fw.newLine();
 				}
 			}
@@ -69,7 +83,7 @@ public class PrintMap {
 			return '\u2588';
 		}
 		else if (e.equals("01")) {
-			return ' ';
+			return '\u00A0';
 		}
 		else if (e.equals("10")) {
 			return '\u2592';
