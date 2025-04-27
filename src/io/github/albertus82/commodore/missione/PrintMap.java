@@ -1,20 +1,23 @@
-package it.albertus.commodore.missione;
+package io.github.albertus82.commodore.missione;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.OptionalInt;
 
 public class PrintMap {
 
-	public static void main(String... args) throws IOException {
-		final var is = PrintMap.class.getResourceAsStream("missione.vsf");
-		final var file = new byte[69794];
-		is.read(file);
-		is.close();
+	public static void main(final String... args) throws IOException {
+		final byte[] file;
+		try (final var is = PrintMap.class.getResourceAsStream("dump.vsf")) {
+			file = is.readAllBytes();
+		}
 
-		final int startAddr = 41092;
-		final int endAddr = 0xB483;
+		final var memOffset = memmem(file, "C64MEM".getBytes(StandardCharsets.US_ASCII)).orElseThrow();
+		final var startAddr = memOffset + 0xA01A;
+		final var endAddr = startAddr + 4950;
 
 		final var map = new char[128][128];
 		int row = 0;
@@ -51,10 +54,10 @@ public class PrintMap {
 					sriga.append(c).append(c);
 				}
 
-				if (!sriga.isEmpty()) {
+				if (!sriga.toString().isBlank()) {
 					final var sln = String.format("%3d ", ++ln);
 					fw.append(sln);
-					fw.append(sriga);
+					fw.append(sriga.toString().trim());
 					fw.newLine();
 				}
 			}
@@ -69,13 +72,31 @@ public class PrintMap {
 			return ' ';
 		}
 		else if (e.equals("10")) {
-			return '~';
+			return '\u2592';
 		}
 		else if (e.equals("11")) {
-			return '*';
+			return '\u25A0';
 		}
 		else {
-			return '?';
+			throw new IllegalArgumentException(e);
 		}
+	}
+
+	private static OptionalInt memmem(final byte[] haystack, final byte[] needle) {
+		if (needle.length == 0) {
+			throw new IllegalArgumentException("needle must not be empty");
+		}
+		for (int i = 0; i < haystack.length - needle.length + 1; ++i) {
+			boolean found = true;
+			for (int j = 0; j < needle.length; ++j) {
+				if (haystack[i + j] != needle[j]) {
+					found = false;
+					break;
+				}
+			}
+			if (found)
+				return OptionalInt.of(i);
+		}
+		return OptionalInt.empty();
 	}
 }
