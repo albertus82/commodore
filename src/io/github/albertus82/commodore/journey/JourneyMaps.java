@@ -1,4 +1,4 @@
-package io.github.albertus82.commodore.missione;
+package io.github.albertus82.commodore.journey;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -7,13 +7,11 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.OptionalInt;
 
-public class PrintMap {
+public class JourneyMaps {
 
 	public static void main(final String... args) throws IOException {
-		final var outPath = Path.of(args != null && args.length > 0 && args[0] != null && !args[0].isBlank() ? args[0].trim() : "map.txt");
-
 		final byte[] dump;
-		try (final var is = PrintMap.class.getResourceAsStream("dump.vsf")) {
+		try (final var is = JourneyMaps.class.getResourceAsStream("journey.vsf")) {
 			dump = is.readAllBytes();
 		}
 
@@ -48,10 +46,11 @@ public class PrintMap {
 			row++;
 		}
 
-		Files.write(outPath, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
-		try (final var fw = Files.newBufferedWriter(outPath, StandardOpenOption.APPEND)) {
-			for (final var map : maps) {
-				for (final var rowArr : map) {
+		for (int i = 0; i < maps.length; i++) {
+			final var outPath = Path.of(i == 0 ? "current.txt" : "original.txt");
+			Files.write(outPath, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
+			try (final var fw = Files.newBufferedWriter(outPath, StandardOpenOption.APPEND)) {
+				for (final var rowArr : maps[i]) {
 					final var rowStr = new StringBuilder();
 					for (final var c : rowArr) {
 						rowStr.append(c).append(c);
