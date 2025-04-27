@@ -10,20 +10,20 @@ import java.util.OptionalInt;
 public class PrintMap {
 
 	public static void main(final String... args) throws IOException {
-		final byte[] file;
+		final byte[] dump;
 		try (final var is = PrintMap.class.getResourceAsStream("dump.vsf")) {
-			file = is.readAllBytes();
+			dump = is.readAllBytes();
 		}
 
-		final var memOffset = memmem(file, "C64MEM".getBytes(StandardCharsets.US_ASCII)).orElseThrow();
-		final var startAddr = memOffset + 0xA01A;
-		final var endAddr = startAddr + 4950;
+		final var baseAddr = memmem(dump, "C64MEM".getBytes(StandardCharsets.US_ASCII)).orElseThrow();
+		final var startAddr = baseAddr + 0xA01A;
+		final var endAddr = startAddr + 5000;
 
-		final var map = new char[128][128];
-		int row = 0;
-		int col = 0;
+		final var map = new char[128][84];
+		var row = 0;
+		var col = 0;
 
-		for (int i = startAddr; i <= endAddr; i++) {
+		for (var i = startAddr; i <= endAddr; i++) {
 			if (row != 0 && row % 128 == 0) {
 				i += 128;
 				row = 0;
@@ -31,11 +31,11 @@ public class PrintMap {
 			}
 
 			// dividere il byte in 4 parti binarie 00 00 00 00 che vanno in orizzontale
-			var bin = Integer.toBinaryString(file[i] & 255 | 256).substring(1);
-			var e1 = bin.substring(0, 2);
-			var e2 = bin.substring(2, 4);
-			var e3 = bin.substring(4, 6);
-			var e4 = bin.substring(6);
+			final var bin = Integer.toBinaryString(dump[i] & 255 | 256).substring(1);
+			final var e1 = bin.substring(0, 2);
+			final var e2 = bin.substring(2, 4);
+			final var e3 = bin.substring(4, 6);
+			final var e4 = bin.substring(6);
 
 			map[row][col] = toChar(e1);
 			map[row][col + 1] = toChar(e2);
@@ -57,7 +57,7 @@ public class PrintMap {
 				if (!sriga.toString().isBlank()) {
 					final var sln = String.format("%3d ", ++ln);
 					fw.append(sln);
-					fw.append(sriga.toString().trim());
+					fw.append(sriga.toString());
 					fw.newLine();
 				}
 			}
