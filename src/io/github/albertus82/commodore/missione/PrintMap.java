@@ -21,23 +21,18 @@ public class PrintMap {
 		final var startAddr = baseAddr + 0xA01A;
 		final var endAddr = startAddr + 5120;
 
-		final var map1 = new char[128][84];
-		final var map2 = new char[128][84];
-		var maps = new char[][][] {map1,map2};
-		var j = 0;
-		var map = maps[j];
+		final var maps = new char[][][] { new char[128][84], new char[128][84] };
+		var mi = 0;
 		var row = 0;
 		var col = 0;
 
 		for (var i = startAddr; i <= endAddr; i++) {
-			System.out.println(i);
 			if (row != 0 && row % 128 == 0) {
-				//i += 128;
-				j = j==0?1:0;
-				map = maps[j];
+				mi = mi == 0 ? 1 : 0;
 				col += 2;
 				row = 0;
 			}
+			final var map = maps[mi];
 
 			// dividere il byte in 4 parti binarie 00 00 00 00 che vanno in orizzontale
 			final var bin = Integer.toBinaryString(dump[i] & 255 | 256).substring(1);
@@ -55,24 +50,16 @@ public class PrintMap {
 
 		Files.write(outPath, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
 		try (final var fw = Files.newBufferedWriter(outPath, StandardOpenOption.APPEND)) {
-			for (final var rowArr : map1) {
-				final var rowStr = new StringBuilder();
-				for (final var c : rowArr) {
-					rowStr.append(c).append(c);
-				}
-				if (!rowStr.toString().isBlank()) {
-					fw.append(rowStr);
-					fw.newLine();
-				}
-			}
-			for (final var rowArr : map2) {
-				final var rowStr = new StringBuilder();
-				for (final var c : rowArr) {
-					rowStr.append(c).append(c);
-				}
-				if (!rowStr.toString().isBlank()) {
-					fw.append(rowStr.toString().trim());
-					fw.newLine();
+			for (final var map : maps) {
+				for (final var rowArr : map) {
+					final var rowStr = new StringBuilder();
+					for (final var c : rowArr) {
+						rowStr.append(c).append(c);
+					}
+					if (!rowStr.toString().isBlank()) {
+						fw.append(rowStr.toString().trim());
+						fw.newLine();
+					}
 				}
 			}
 		}
