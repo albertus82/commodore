@@ -71,21 +71,13 @@ public class JourneyMaps {
 	}
 
 	private static char toChar(final String e) {
-		if (e.equals("00")) {
-			return '\u2588';
-		}
-		else if (e.equals("01")) {
-			return '\u00A0';
-		}
-		else if (e.equals("10")) {
-			return '\u2592';
-		}
-		else if (e.equals("11")) {
-			return '\u25A0';
-		}
-		else {
-			throw new IllegalArgumentException(e);
-		}
+		return switch (e) {
+		case "00" -> '\u2588';
+		case "01" -> '\u00A0';
+		case "10" -> '\u2592';
+		case "11" -> '\u25A0';
+		default -> throw new IllegalArgumentException(e);
+		};
 	}
 
 	private static OptionalInt memmem(final byte[] haystack, final byte[] needle) {
