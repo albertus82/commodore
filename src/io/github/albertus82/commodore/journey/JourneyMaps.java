@@ -54,7 +54,7 @@ public class JourneyMaps {
 		}
 		for (int i = 0; i < maps.size(); i++) {
 			final var outPath = Path.of(outDir.toString(), i == 0 ? "journey-map-current.txt" : "journey-map-original.txt");
-			Files.write(outPath, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
+			Files.write(outPath, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }); // UTF-8 BOM
 			try (final var fw = Files.newBufferedWriter(outPath, StandardOpenOption.APPEND)) {
 				for (final var rowArr : maps.get(i)) {
 					final var rowStr = new StringBuilder();
