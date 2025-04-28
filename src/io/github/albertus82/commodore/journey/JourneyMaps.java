@@ -12,12 +12,12 @@ import java.util.zip.GZIPInputStream;
 public class JourneyMaps {
 
 	public static void main(final String... args) throws IOException {
-		final byte[] dump;
+		final byte[] vsf;
 		try (final var is = JourneyMaps.class.getResourceAsStream("journey.vsf.gz"); final var gzis = new GZIPInputStream(is)) {
-			dump = gzis.readAllBytes();
+			vsf = gzis.readAllBytes();
 		}
 
-		final var baseAddr = memmem(dump, "C64MEM".getBytes(StandardCharsets.US_ASCII)).orElseThrow(() -> new IllegalStateException("Bad VSF file"));
+		final var baseAddr = memmem(vsf, "C64MEM".getBytes(StandardCharsets.US_ASCII)).orElseThrow(() -> new IllegalStateException("Bad VSF file"));
 		final var startAddr = baseAddr + 0xA01A;
 		final var endAddr = startAddr + 0x1400;
 
@@ -35,7 +35,7 @@ public class JourneyMaps {
 			final var map = maps.get(mi);
 
 			// dividere il byte in 4 parti binarie 00 00 00 00 che vanno in orizzontale
-			final var bin = Integer.toBinaryString(dump[i] & 255 | 256).substring(1);
+			final var bin = Integer.toBinaryString(vsf[i] & 255 | 256).substring(1);
 			final var e1 = bin.substring(0, 2);
 			final var e2 = bin.substring(2, 4);
 			final var e3 = bin.substring(4, 6);
@@ -93,8 +93,8 @@ public class JourneyMaps {
 			throw new IllegalArgumentException("needle must not be empty");
 		}
 		for (int i = 0; i < haystack.length - needle.length + 1; ++i) {
-			boolean found = true;
-			for (int j = 0; j < needle.length; ++j) {
+			var found = true;
+			for (var j = 0; j < needle.length; ++j) {
 				if (haystack[i + j] != needle[j]) {
 					found = false;
 					break;
