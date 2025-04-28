@@ -1,2 +1,6 @@
+.project
+.classpath
+.settings/
+/target/
 /bin/
 /journey*.txt
