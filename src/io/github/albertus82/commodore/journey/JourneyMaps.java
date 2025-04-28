@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.OptionalInt;
 import java.util.zip.GZIPInputStream;
 
@@ -20,7 +21,7 @@ public class JourneyMaps {
 		final var startAddr = baseAddr + 0xA01A;
 		final var endAddr = startAddr + 0x1400;
 
-		final var maps = new char[][][] { new char[128][84], new char[128][84] };
+		final var maps = List.of(new char[128][84], new char[128][84]);
 		var mi = 0;
 		var row = 0;
 		var col = 0;
@@ -31,7 +32,7 @@ public class JourneyMaps {
 				col += 2;
 				row = 0;
 			}
-			final var map = maps[mi];
+			final var map = maps.get(mi);
 
 			// dividere il byte in 4 parti binarie 00 00 00 00 che vanno in orizzontale
 			final var bin = Integer.toBinaryString(dump[i] & 255 | 256).substring(1);
@@ -51,11 +52,11 @@ public class JourneyMaps {
 		if (!Files.exists(outDir)) {
 			Files.createDirectories(outDir);
 		}
-		for (int i = 0; i < maps.length; i++) {
+		for (int i = 0; i < maps.size(); i++) {
 			final var outPath = Path.of(outDir.toString(), i == 0 ? "journey-map-current.txt" : "journey-map-original.txt");
 			Files.write(outPath, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
 			try (final var fw = Files.newBufferedWriter(outPath, StandardOpenOption.APPEND)) {
-				for (final var rowArr : maps[i]) {
+				for (final var rowArr : maps.get(i)) {
 					final var rowStr = new StringBuilder();
 					for (final var c : rowArr) {
 						rowStr.append(c).append(c);
