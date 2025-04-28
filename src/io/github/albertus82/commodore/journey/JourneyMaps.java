@@ -6,18 +6,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.OptionalInt;
+import java.util.zip.GZIPInputStream;
 
 public class JourneyMaps {
 
 	public static void main(final String... args) throws IOException {
 		final byte[] dump;
-		try (final var is = JourneyMaps.class.getResourceAsStream("journey.vsf")) {
-			dump = is.readAllBytes();
+		try (final var is = JourneyMaps.class.getResourceAsStream("journey.vsf.gz"); final var gzis = new GZIPInputStream(is)) {
+			dump = gzis.readAllBytes();
 		}
 
-		final var baseAddr = memmem(dump, "C64MEM".getBytes(StandardCharsets.US_ASCII)).orElseThrow();
+		final var baseAddr = memmem(dump, "C64MEM".getBytes(StandardCharsets.US_ASCII)).orElseThrow(() -> new IllegalStateException("Bad VSF file"));
 		final var startAddr = baseAddr + 0xA01A;
-		final var endAddr = startAddr + 5120;
+		final var endAddr = startAddr + 0x1400;
 
 		final var maps = new char[][][] { new char[128][84], new char[128][84] };
 		var mi = 0;
@@ -46,8 +47,12 @@ public class JourneyMaps {
 			row++;
 		}
 
+		final var outDir = Path.of(args != null && args.length > 0 && args[0] != null && !args[0].isBlank() ? args[0].trim() : "").toAbsolutePath();
+		if (!Files.exists(outDir)) {
+			Files.createDirectories(outDir);
+		}
 		for (int i = 0; i < maps.length; i++) {
-			final var outPath = Path.of(i == 0 ? "current.txt" : "original.txt");
+			final var outPath = Path.of(outDir.toString(), i == 0 ? "journey-map-current.txt" : "journey-map-original.txt");
 			Files.write(outPath, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
 			try (final var fw = Files.newBufferedWriter(outPath, StandardOpenOption.APPEND)) {
 				for (final var rowArr : maps[i]) {
