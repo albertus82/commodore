@@ -34,7 +34,7 @@ public class JourneyMaps {
 			}
 			final var map = maps.get(mi);
 
-			// dividere il byte in 4 parti binarie 00 00 00 00 che vanno in orizzontale
+			// Divide the byte in 4 binary parts 00 00 00 00 that expand horizontally
 			final var bin = Integer.toBinaryString(vsf[i] & 255 | 256).substring(1);
 			final var e1 = bin.substring(0, 2);
 			final var e2 = bin.substring(2, 4);
@@ -59,7 +59,7 @@ public class JourneyMaps {
 				for (final var rowArr : maps.get(i)) {
 					final var rowStr = new StringBuilder();
 					for (final var c : rowArr) {
-						rowStr.append(c).append(c);
+						rowStr.append(c).append(c); // Double width
 					}
 					if (!rowStr.toString().isBlank()) {
 						fw.append(rowStr.toString().trim());
