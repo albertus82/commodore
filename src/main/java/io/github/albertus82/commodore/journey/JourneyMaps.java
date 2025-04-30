@@ -59,7 +59,12 @@ public class JourneyMaps {
 				for (final var rowArr : maps.get(i)) {
 					final var rowStr = new StringBuilder();
 					for (final var c : rowArr) {
-						rowStr.append(c).append(c); // Double width
+						if (c == 'O') {
+							rowStr.append("\u250F\u2513");
+						}
+						else {
+							rowStr.append(c).append(c); // Double width
+						}
 					}
 					if (!rowStr.toString().isBlank()) {
 						fw.append(rowStr.toString().trim());
@@ -72,10 +77,10 @@ public class JourneyMaps {
 
 	private static char toChar(final String e) {
 		return switch (e) {
-		case "00" -> '\u2588';
-		case "01" -> '\u00A0';
-		case "10" -> '\u2592';
-		case "11" -> '\u25A0';
+		case "00" -> '\u2588'; // Ground
+		case "01" -> '\u00A0'; // Air
+		case "10" -> '\u2592'; // Water / Acid / Teleport / Sky / Special
+		case "11" -> 'O'; // Object
 		default -> throw new IllegalArgumentException(e);
 		};
 	}
